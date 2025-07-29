@@ -53,7 +53,7 @@ void UsbCtrl_SetCallbackContext(AppContext_t *appCtx)
     g_usbCallbackContext = appCtx;
 }
 
-CyU3PReturnStatus_t UsbCtrl_RegisterCallbacks(void)
+CyU3PReturnStatus_t UsbCtrl_RegisterCallbacks()
 {
     if (!g_usbCallbackContext) {
         return CY_U3P_ERROR_NOT_CONFIGURED;

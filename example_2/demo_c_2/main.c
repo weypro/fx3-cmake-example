@@ -534,7 +534,7 @@ void BulkSrcSinkAppThread_Entry(uint32_t input)
 }
 
 // Application define function which creates the threads
-void CyFxApplicationDefine(void)
+void CyFxApplicationDefine()
 {
     void *ptr = NULL;
     uint32_t ret = CY_U3P_SUCCESS;
@@ -569,7 +569,7 @@ void CyFxApplicationDefine(void)
 }
 
 // Main function
-int main(void)
+int main()
 {
     CyU3PIoMatrixConfig_t io_cfg = IO_MATRIX_CONFIG_DEFAULT;
     CyU3PReturnStatus_t status = CY_U3P_SUCCESS;

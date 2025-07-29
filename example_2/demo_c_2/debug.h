@@ -5,6 +5,6 @@
 
 // Function declarations
 void CyFxAppErrorHandler(CyU3PReturnStatus_t apiRetStatus);
-void CyFxBulkSrcSinkApplnDebugInit(void);
+void CyFxBulkSrcSinkApplnDebugInit();
 
 #endif // _DEBUG_H_

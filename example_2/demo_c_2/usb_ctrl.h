@@ -35,7 +35,7 @@ void UsbCtrl_SetAppContext(UsbCtrlContext_t *ctx, AppContext_t *appCtx);
 void UsbCtrl_SetCallbackContext(AppContext_t *appCtx);
 
 // Register USB callbacks with the SDK
-CyU3PReturnStatus_t UsbCtrl_RegisterCallbacks(void);
+CyU3PReturnStatus_t UsbCtrl_RegisterCallbacks();
 
 // State query and modification functions
 uint32_t UsbCtrl_GetEp0StatCount(const UsbCtrlContext_t *ctx);

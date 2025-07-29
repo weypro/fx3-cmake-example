@@ -35,7 +35,7 @@ void Power_SetCallbackContext(PowerContext_t *ctx);
 
 // SDK callback functions
 CyBool_t CyFxApplnLPMRqtCB(CyU3PUsbLinkPowerMode link_mode);
-void TimerCb(void);
+void TimerCb();
 CyBool_t CyFxBulkSrcSinkApplntCB(CyU3PUsbLinkPowerMode link_mode);
 
 #endif // _POWER_H_

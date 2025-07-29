@@ -99,7 +99,7 @@ CyBool_t CyFxApplnLPMRqtCB(CyU3PUsbLinkPowerMode link_mode)
     return CyTrue;
 }
 
-void TimerCb(void)
+void TimerCb()
 {
     // Enable the low power mode transition on timer expiry
     CyU3PUsbLPMEnable();

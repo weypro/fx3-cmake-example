@@ -248,57 +248,57 @@ static const usb_descriptor_info_t descriptor_table[USB_DESC_COUNT] = {
     [USB_DESC_DEVICE_SS] = {
         .data = usb_device_descriptor_ss,
         .length = sizeof(usb_device_descriptor_ss),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_DEVICE_HS] = {
         .data = usb_device_descriptor_hs,
         .length = sizeof(usb_device_descriptor_hs),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_DEVICE_QUALIFIER] = {
         .data = usb_device_qualifier_descriptor,
         .length = sizeof(usb_device_qualifier_descriptor),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_CONFIG_SS] = {
         .data = usb_config_descriptor_ss,
         .length = sizeof(usb_config_descriptor_ss),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_CONFIG_HS] = {
         .data = usb_config_descriptor_hs,
         .length = sizeof(usb_config_descriptor_hs),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_CONFIG_FS] = {
         .data = usb_config_descriptor_fs,
         .length = sizeof(usb_config_descriptor_fs),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_BOS] = {
         .data = usb_bos_descriptor,
         .length = sizeof(usb_bos_descriptor),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_STRING_LANG] = {
         .data = usb_string_lang_descriptor,
         .length = sizeof(usb_string_lang_descriptor),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_STRING_MANUFACTURER] = {
         .data = usb_string_manufacturer_descriptor,
         .length = sizeof(usb_string_manufacturer_descriptor),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_STRING_PRODUCT] = {
         .data = usb_string_product_descriptor,
         .length = sizeof(usb_string_product_descriptor),
-        .is_available = true
+        .is_available = TRUE
     },
     [USB_DESC_MS_OS] = {
         .data = usb_ms_os_descriptor,
         .length = sizeof(usb_ms_os_descriptor),
-        .is_available = true
+        .is_available = TRUE
     }
 };
 
@@ -327,7 +327,7 @@ uint16_t usb_descriptors_get_length(usb_descriptor_type_t type)
 }
 
 // Register all descriptors with USB driver
-fx3_result_t usb_descriptors_register_all(void)
+fx3_result_t usb_descriptors_register_all()
 {
     CyU3PReturnStatus_t status;
     
@@ -415,7 +415,7 @@ usb_endpoint_config_t usb_descriptors_get_endpoint_config(usb_speed_t speed)
 }
 
 // Validate descriptor integrity
-fx3_result_t usb_descriptors_validate(void)
+fx3_result_t usb_descriptors_validate()
 {
     // Check that all required descriptors are available
     for (int i = 0; i < USB_DESC_COUNT; i++) {
@@ -430,29 +430,29 @@ fx3_result_t usb_descriptors_validate(void)
 }
 
 // Utility functions for descriptor information
-bool usb_descriptors_is_super_speed_capable(void)
+BOOL usb_descriptors_is_super_speed_capable()
 {
     return descriptor_table[USB_DESC_DEVICE_SS].is_available;
 }
 
-bool usb_descriptors_is_self_powered(void)
+BOOL usb_descriptors_is_self_powered()
 {
     // Check configuration descriptor for self-powered attribute
     // For this implementation, device is bus-powered
-    return false;
+    return FALSE;
 }
 
-uint16_t usb_descriptors_get_vendor_id(void)
+uint16_t usb_descriptors_get_vendor_id()
 {
     return USB_VENDOR_ID;
 }
 
-uint16_t usb_descriptors_get_product_id(void)
+uint16_t usb_descriptors_get_product_id()
 {
     return USB_PRODUCT_ID;
 }
 
-uint16_t usb_descriptors_get_device_version(void)
+uint16_t usb_descriptors_get_device_version()
 {
     return USB_DEVICE_VERSION;
 }

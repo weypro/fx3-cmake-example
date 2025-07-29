@@ -11,6 +11,7 @@
 
 #include "app.h"
 
+
 CyU3PReturnStatus_t Dma_Init(DmaContext_t *ctx)
 {
     if (!ctx) {
@@ -139,6 +140,7 @@ void Dma_FillInBuffers(DmaContext_t *ctx)
         if (stat != CY_U3P_SUCCESS) {
             CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
             // Handle error appropriately
+            CyFxAppErrorHandler(stat);
             break;
         }
 
@@ -147,6 +149,7 @@ void Dma_FillInBuffers(DmaContext_t *ctx)
         if (stat != CY_U3P_SUCCESS) {
             CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
             // Handle error appropriately
+            CyFxAppErrorHandler(stat);
             break;
         }
     }
@@ -252,6 +255,3 @@ void Dma_SetCallbackContext(DmaContext_t *ctx)
 {
     g_dmaCallbackContext = ctx;
 }
-
-// Missing function declaration that was referenced
-extern void CyFxAppErrorHandler(CyU3PReturnStatus_t apiRetStatus);

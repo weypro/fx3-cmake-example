@@ -25,7 +25,7 @@ typedef enum {
 typedef struct {
     const uint8_t* data;           // Pointer to descriptor data
     uint16_t length;               // Descriptor length in bytes
-    bool is_available;             // Whether descriptor is available
+    BOOL is_available;             // Whether descriptor is available
 } usb_descriptor_info_t;
 
 // USB endpoint configuration for different speeds
@@ -45,20 +45,20 @@ const uint8_t* usb_descriptors_get_data(usb_descriptor_type_t type);
 uint16_t usb_descriptors_get_length(usb_descriptor_type_t type);
 
 // Register all descriptors with USB driver
-fx3_result_t usb_descriptors_register_all(void);
+fx3_result_t usb_descriptors_register_all();
 
 // Get endpoint configuration for current USB speed
 usb_endpoint_config_t usb_descriptors_get_endpoint_config(usb_speed_t speed);
 
 // Validate descriptor integrity
-fx3_result_t usb_descriptors_validate(void);
+fx3_result_t usb_descriptors_validate();
 
 // Descriptor utility functions
-bool usb_descriptors_is_super_speed_capable(void);
-bool usb_descriptors_is_self_powered(void);
-uint16_t usb_descriptors_get_vendor_id(void);
-uint16_t usb_descriptors_get_product_id(void);
-uint16_t usb_descriptors_get_device_version(void);
+BOOL usb_descriptors_is_super_speed_capable();
+BOOL usb_descriptors_is_self_powered();
+uint16_t usb_descriptors_get_vendor_id();
+uint16_t usb_descriptors_get_product_id();
+uint16_t usb_descriptors_get_device_version();
 
 // External descriptor declarations (defined in usb_descriptors.c)
 extern const uint8_t usb_device_descriptor_ss[];

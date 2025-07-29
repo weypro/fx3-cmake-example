@@ -29,7 +29,7 @@ CyFxAppErrorHandler (
 // are routed to the UART and can be seen using a UART console
 // running at 115200 baud rate.
 void
-CyFxBulkSrcSinkApplnDebugInit (void)
+CyFxBulkSrcSinkApplnDebugInit ()
 {
     CyU3PGpioClock_t  gpioClock = GPIO_CLOCK_CONFIG_DEFAULT;
     CyU3PUartConfig_t uartConfig = UART_CONFIG_DEFAULT;
