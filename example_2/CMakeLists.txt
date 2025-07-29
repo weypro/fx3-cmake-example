@@ -21,6 +21,7 @@ option(ENABLE_STDCXX   "Enable standard C++ library"      ON)
 
 # 选择要构建的 demo
 option(BUILD_DEMO_C   "Build pure-C demo target"   ON)
+option(BUILD_DEMO_C_2   "Build pure-C demo 2 target"   ON)
 option(BUILD_DEMO_CPP "Build C++ demo target"      ON)
 
 # -----------------------------------------------------------------------------
@@ -49,6 +50,11 @@ set(COMMON_COMPILE_DEFINITIONS
 # -----------------------------------------------------------------------------
 if(BUILD_DEMO_C)
   add_subdirectory(demo_c)
+  add_subdirectory(demo_c_1)
+endif()
+
+if(BUILD_DEMO_C_2)
+  add_subdirectory(demo_c_2)
 endif()
 
 if(BUILD_DEMO_CPP)
