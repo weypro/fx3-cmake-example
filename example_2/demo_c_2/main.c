@@ -25,6 +25,25 @@ void CyFxBulkSrcSinkApplnStop(AppContext_t *appCtx);
 void CyFxBulkSrcSinkApplnUSBEventCB(CyU3PUsbEventType_t evtype, uint16_t evdata);
 void CyFxBulkSrcSinkApplnInit(AppContext_t *appCtx);
 
+// DMA event callback function to handle power management
+static void OnDmaEvent(dma_evt_t evt, void *user)
+{
+    AppContext_t *appCtx = (AppContext_t *)user;
+
+    if (!appCtx) {
+        return;
+    }
+
+    // Handle power management tasks that were previously in DMA callback
+    if (evt == DMA_EVT_PROD || evt == DMA_EVT_CONS) {
+        // Start/restart the timer and disable LPM
+        CyU3PUsbLPMDisable();
+        CyU3PTimerStop(&appCtx->power.lpmTimer);
+        CyU3PTimerModify(&appCtx->power.lpmTimer, LPM_TIMER_TIMEOUT, 0);
+        CyU3PTimerStart(&appCtx->power.lpmTimer);
+    }
+}
+
 // Function to start the application after USB configuration
 void CyFxBulkSrcSinkApplnStart(AppContext_t *appCtx)
 {
@@ -85,6 +104,9 @@ void CyFxBulkSrcSinkApplnStart(AppContext_t *appCtx)
         CyFxAppErrorHandler(apiRetStatus);
     }
 
+    // Register DMA event callback for power management
+    Dma_RegisterListener(&appCtx->dma, OnDmaEvent, appCtx);
+
     // Start DMA transfers
     apiRetStatus = Dma_StartTransfer(&appCtx->dma);
     if (apiRetStatus != CY_U3P_SUCCESS) {
@@ -94,7 +116,7 @@ void CyFxBulkSrcSinkApplnStart(AppContext_t *appCtx)
 
     // Register endpoint event callback
     CyU3PUsbRegisterEpEvtCallback(CyFxBulkSrcSinkApplnEpEvtCB, CYU3P_USBEP_SS_RETRY_EVT, 0x00, 0x02);
-    
+
     // Fill IN buffers with data
     Dma_FillInBuffers(&appCtx->dma);
 
@@ -292,8 +314,6 @@ void BulkSrcSinkAppThread_Entry(uint32_t input)
     }
 
     // Set up cross-module references
-    Dma_SetAppContext(&g_appContext.dma, &g_appContext);
-    Dma_SetCallbackContext(&g_appContext.dma);
     Power_SetCallbackContext(&g_appContext.power);
     UsbCtrl_SetAppContext(&g_appContext.usbCtrl, &g_appContext);
     UsbCtrl_SetCallbackContext(&g_appContext);

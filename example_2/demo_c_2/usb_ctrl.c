@@ -164,12 +164,12 @@ CyBool_t CyFxBulkSrcSinkApplnUSBSetupCB(uint32_t setupdat0, uint32_t setupdat1)
                     CyU3PBusyWait(125);
 
                     // Use DMA module API for channel operations
-                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.chHandleBulkSink);
+                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.sink.fx3);
                     CyU3PUsbFlushEp(USB_EP_PRODUCER);
                     CyU3PUsbResetEp(USB_EP_PRODUCER);
                     CyU3PUsbSetEpNak(USB_EP_PRODUCER, CyFalse);
 
-                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.chHandleBulkSink, DMA_TRANSFER_SIZE_INFINITE);
+                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.sink.fx3, DMA_TRANSFER_SIZE_INFINITE);
                     CyU3PUsbStall(wIndex, CyFalse, CyTrue);
                     isHandled = CyTrue;
                     CyU3PUsbAckSetup();
@@ -180,12 +180,12 @@ CyBool_t CyFxBulkSrcSinkApplnUSBSetupCB(uint32_t setupdat0, uint32_t setupdat1)
                     CyU3PBusyWait(125);
 
                     // Use DMA module API for channel operations
-                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.chHandleBulkSrc);
+                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.src.fx3);
                     CyU3PUsbFlushEp(USB_EP_CONSUMER);
                     CyU3PUsbResetEp(USB_EP_CONSUMER);
                     CyU3PUsbSetEpNak(USB_EP_CONSUMER, CyFalse);
 
-                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.chHandleBulkSrc, DMA_TRANSFER_SIZE_INFINITE);
+                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.src.fx3, DMA_TRANSFER_SIZE_INFINITE);
                     CyU3PUsbStall(wIndex, CyFalse, CyTrue);
                     isHandled = CyTrue;
                     CyU3PUsbAckSetup();

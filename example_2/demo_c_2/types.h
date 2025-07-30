@@ -106,4 +106,8 @@ static inline uint16_t usb_get_packet_size(usb_speed_t speed) {
     }
 }
 
+
+#define CONTAINER_OF(ptr, type, member) \
+((type *)((char *)(ptr) - offsetof(type, member)))
+
 #endif // _TYPES_H_

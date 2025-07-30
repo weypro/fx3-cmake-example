@@ -1,5 +1,4 @@
 #include "dma.h"
-#include "power.h"
 #include "debug.h"
 #include "cyu3system.h"
 #include "cyu3os.h"
@@ -9,8 +8,12 @@
 #include "usb_descriptors.h"
 #include "system_config.h"
 
-#include "app.h"
 
+
+
+// Internal DMA callback function
+static void DmaCb(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type,
+                  CyU3PDmaCBInput_t *input);
 
 CyU3PReturnStatus_t Dma_Init(DmaContext_t *ctx)
 {
@@ -19,13 +22,16 @@ CyU3PReturnStatus_t Dma_Init(DmaContext_t *ctx)
     }
 
     // Initialize all DMA-related state
-    memset(&ctx->chHandleBulkSink, 0, sizeof(CyU3PDmaChannel));
-    memset(&ctx->chHandleBulkSrc, 0, sizeof(CyU3PDmaChannel));
+    memset(&ctx->sink.fx3, 0, sizeof(CyU3PDmaChannel));
+    memset(&ctx->src.fx3, 0, sizeof(CyU3PDmaChannel));
+    ctx->sink.owner = NULL;
+    ctx->src.owner = NULL;
     ctx->dmaRxCount = 0;
     ctx->dmaTxCount = 0;
     ctx->dataTransStarted = CyFalse;
     ctx->srcEpFlush = CyFalse;
-    ctx->appCtx = NULL;
+    ctx->cb = NULL;
+    ctx->cb_user = NULL;
 
     return CY_U3P_SUCCESS;
 }
@@ -40,7 +46,7 @@ void Dma_Deinit(DmaContext_t *ctx)
     Dma_TeardownChannels(ctx);
 }
 
-CyU3PReturnStatus_t Dma_SetupChannels(DmaContext_t *ctx, uint16_t packetSize, 
+CyU3PReturnStatus_t Dma_SetupChannels(DmaContext_t *ctx, uint16_t packetSize,
                                        CyU3PUSBSpeed_t usbSpeed)
 {
     if (!ctx) {
@@ -53,6 +59,10 @@ CyU3PReturnStatus_t Dma_SetupChannels(DmaContext_t *ctx, uint16_t packetSize,
     // Calculate buffer size based on USB speed and configuration
     uint32_t bufferSize = (packetSize * DMA_BURST_LENGTH) * DMA_SIZE_MULTIPLIER;
 
+    // Set up owner references before creating channels
+    ctx->sink.owner = ctx;
+    ctx->src.owner = ctx;
+
     // Create DMA MANUAL_IN channel for the producer socket (OUT endpoint)
     CyU3PMemSet((uint8_t *)&dmaCfg, 0, sizeof(dmaCfg));
     dmaCfg.size = bufferSize;
@@ -61,13 +71,13 @@ CyU3PReturnStatus_t Dma_SetupChannels(DmaContext_t *ctx, uint16_t packetSize,
     dmaCfg.consSckId = CY_U3P_CPU_SOCKET_CONS;
     dmaCfg.dmaMode = CY_U3P_DMA_MODE_BYTE;
     dmaCfg.notification = CY_U3P_DMA_CB_PROD_EVENT;
-    dmaCfg.cb = CyFxBulkSrcSinkDmaCallback;
+    dmaCfg.cb = DmaCb;
     dmaCfg.prodHeader = 0;
     dmaCfg.prodFooter = 0;
     dmaCfg.consHeader = 0;
     dmaCfg.prodAvailCount = 0;
 
-    apiRetStatus = CyU3PDmaChannelCreate(&ctx->chHandleBulkSink,
+    apiRetStatus = CyU3PDmaChannelCreate(&ctx->sink.fx3,
                                          CY_U3P_DMA_TYPE_MANUAL_IN, &dmaCfg);
     if (apiRetStatus != CY_U3P_SUCCESS) {
         return apiRetStatus;
@@ -78,11 +88,11 @@ CyU3PReturnStatus_t Dma_SetupChannels(DmaContext_t *ctx, uint16_t packetSize,
     dmaCfg.prodSckId = CY_U3P_CPU_SOCKET_PROD;
     dmaCfg.consSckId = USB_EP_CONSUMER_SOCKET;
 
-    apiRetStatus = CyU3PDmaChannelCreate(&ctx->chHandleBulkSrc,
+    apiRetStatus = CyU3PDmaChannelCreate(&ctx->src.fx3,
                                          CY_U3P_DMA_TYPE_MANUAL_OUT, &dmaCfg);
     if (apiRetStatus != CY_U3P_SUCCESS) {
         // Clean up the first channel on failure
-        CyU3PDmaChannelDestroy(&ctx->chHandleBulkSink);
+        CyU3PDmaChannelDestroy(&ctx->sink.fx3);
         return apiRetStatus;
     }
 
@@ -96,8 +106,8 @@ void Dma_TeardownChannels(DmaContext_t *ctx)
     }
 
     // Destroy the DMA channels
-    CyU3PDmaChannelDestroy(&ctx->chHandleBulkSink);
-    CyU3PDmaChannelDestroy(&ctx->chHandleBulkSrc);
+    CyU3PDmaChannelDestroy(&ctx->sink.fx3);
+    CyU3PDmaChannelDestroy(&ctx->src.fx3);
 }
 
 CyU3PReturnStatus_t Dma_StartTransfer(DmaContext_t *ctx)
@@ -109,13 +119,13 @@ CyU3PReturnStatus_t Dma_StartTransfer(DmaContext_t *ctx)
     CyU3PReturnStatus_t apiRetStatus;
 
     // Set DMA channel transfer size for both channels
-    apiRetStatus = CyU3PDmaChannelSetXfer(&ctx->chHandleBulkSink, 
+    apiRetStatus = CyU3PDmaChannelSetXfer(&ctx->sink.fx3,
                                           DMA_TRANSFER_SIZE_INFINITE);
     if (apiRetStatus != CY_U3P_SUCCESS) {
         return apiRetStatus;
     }
 
-    apiRetStatus = CyU3PDmaChannelSetXfer(&ctx->chHandleBulkSrc, 
+    apiRetStatus = CyU3PDmaChannelSetXfer(&ctx->src.fx3,
                                           DMA_TRANSFER_SIZE_INFINITE);
     if (apiRetStatus != CY_U3P_SUCCESS) {
         return apiRetStatus;
@@ -136,7 +146,7 @@ void Dma_FillInBuffers(DmaContext_t *ctx)
 
     // Preload all buffers in the MANUAL_OUT pipe with the required data
     for (index = 0; index < DMA_BUFFER_COUNT; index++) {
-        stat = CyU3PDmaChannelGetBuffer(&ctx->chHandleBulkSrc, &buf_p, CYU3P_NO_WAIT);
+        stat = CyU3PDmaChannelGetBuffer(&ctx->src.fx3, &buf_p, CYU3P_NO_WAIT);
         if (stat != CY_U3P_SUCCESS) {
             CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
             // Handle error appropriately
@@ -145,13 +155,21 @@ void Dma_FillInBuffers(DmaContext_t *ctx)
         }
 
         CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
-        stat = CyU3PDmaChannelCommitBuffer(&ctx->chHandleBulkSrc, buf_p.size, 0);
+        stat = CyU3PDmaChannelCommitBuffer(&ctx->src.fx3, buf_p.size, 0);
         if (stat != CY_U3P_SUCCESS) {
             CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
             // Handle error appropriately
             CyFxAppErrorHandler(stat);
             break;
         }
+    }
+}
+
+void Dma_RegisterListener(DmaContext_t *ctx, dma_evt_cb_t cb, void *user)
+{
+    if (ctx) {
+        ctx->cb = cb;
+        ctx->cb_user = user;
     }
 }
 
@@ -176,13 +194,6 @@ void Dma_ClearSrcEpFlush(DmaContext_t *ctx)
     }
 }
 
-void Dma_SetAppContext(DmaContext_t *ctx, AppContext_t *appCtx)
-{
-    if (ctx) {
-        ctx->appCtx = appCtx;
-    }
-}
-
 CyBool_t Dma_IsDataTransferStarted(const DmaContext_t *ctx)
 {
     return ctx ? ctx->dataTransStarted : CyFalse;
@@ -203,28 +214,22 @@ uint32_t Dma_GetTxCount(const DmaContext_t *ctx)
     return ctx ? ctx->dmaTxCount : 0;
 }
 
-// Global pointer for DMA callback context (SDK limitation workaround)
-static DmaContext_t *g_dmaCallbackContext = NULL;
-
-void CyFxBulkSrcSinkDmaCallback(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type, 
-                                CyU3PDmaCBInput_t *input)
+// Internal DMA callback function using container_of pattern
+static void DmaCb(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type,
+                  CyU3PDmaCBInput_t *input)
 {
-    if (!g_dmaCallbackContext || !g_dmaCallbackContext->appCtx) {
+    // Get the wrapper structure (fx3 is first member, so address is same)
+    DmaContext_t *ctx = CONTAINER_OF(chHandle, Fx3DmaCh_t, fx3)->owner;
+
+    if (!ctx) {
         return;
     }
 
-    DmaContext_t *ctx = g_dmaCallbackContext;
-    AppContext_t *appCtx = ctx->appCtx;
     CyU3PDmaBuffer_t buf_p;
     CyU3PReturnStatus_t status = CY_U3P_SUCCESS;
 
+    // Mark data transfer as started
     ctx->dataTransStarted = CyTrue;
-
-    // Start/restart the timer and disable LPM
-    CyU3PUsbLPMDisable();
-    CyU3PTimerStop(&appCtx->power.lpmTimer);
-    CyU3PTimerModify(&appCtx->power.lpmTimer, LPM_TIMER_TIMEOUT, 0);
-    CyU3PTimerStart(&appCtx->power.lpmTimer);
 
     if (type == CY_U3P_DMA_CB_PROD_EVENT) {
         // Producer event: discard buffer to implement data sink
@@ -233,8 +238,13 @@ void CyFxBulkSrcSinkDmaCallback(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type
             CyU3PDebugPrint(4, "CyU3PDmaChannelDiscardBuffer failed, Error code = %d\n", status);
         }
         ctx->dmaRxCount++;
+
+        // Notify application layer through callback
+        if (ctx->cb) {
+            ctx->cb(DMA_EVT_PROD, ctx->cb_user);
+        }
     }
-    
+
     if (type == CY_U3P_DMA_CB_CONS_EVENT) {
         // Consumer event: commit new buffer to implement data source
         status = CyU3PDmaChannelGetBuffer(chHandle, &buf_p, CYU3P_NO_WAIT);
@@ -247,11 +257,10 @@ void CyFxBulkSrcSinkDmaCallback(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type
             CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", status);
         }
         ctx->dmaTxCount++;
-    }
-}
 
-// Function to set the callback context (must be called before using DMA)
-void Dma_SetCallbackContext(DmaContext_t *ctx)
-{
-    g_dmaCallbackContext = ctx;
+        // Notify application layer through callback
+        if (ctx->cb) {
+            ctx->cb(DMA_EVT_CONS, ctx->cb_user);
+        }
+    }
 }
