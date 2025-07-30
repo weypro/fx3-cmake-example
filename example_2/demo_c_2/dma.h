@@ -6,8 +6,6 @@
 #include "cyu3usb.h"
 
 
-typedef struct AppContext_t AppContext_t;
-
 // DMA event types for callback notification
 typedef enum {
     DMA_EVT_PROD,  // Producer event (data received)

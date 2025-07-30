@@ -1,4 +1,3 @@
-// power.h - Refactored Power Management Module
 #ifndef _POWER_H_
 #define _POWER_H_
 

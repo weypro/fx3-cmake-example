@@ -9,8 +9,6 @@
 #include "system_config.h"
 
 
-
-
 // Internal DMA callback function
 static void DmaCb(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type,
                   CyU3PDmaCBInput_t *input);
