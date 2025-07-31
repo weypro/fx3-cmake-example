@@ -117,7 +117,7 @@ void CyFxBulkSrcSinkApplnStart(AppContext_t *appCtx)
     }
 
     // Register endpoint event callback
-    CyU3PUsbRegisterEpEvtCallback(CyFxBulkSrcSinkApplnEpEvtCB, CYU3P_USBEP_SS_RETRY_EVT, 0x00, 0x02);
+    CyU3PUsbRegisterEpEvtCallback(CyFxBulkSrcSinkApplnEpEvtCB, CYU3P_USBEP_SS_RETRY_EVT, 0x00, 0x04);
 
     // Fill IN buffers with data
     Dma_FillInBuffers(&appCtx->dma);

@@ -216,24 +216,60 @@ void Dma_FillInBuffers(DmaContext_t *ctx)
     uint16_t index = 0;
 
     // Preload all buffers in the control MANUAL_OUT pipe with the required data
-    for (index = 0; index < DMA_BUFFER_COUNT; index++) {
-        stat = CyU3PDmaChannelGetBuffer(&ctx->src.fx3, &buf_p, CYU3P_NO_WAIT);
-        if (stat != CY_U3P_SUCCESS) {
-            CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
-            // Handle error appropriately
-            CyFxAppErrorHandler(stat);
-            break;
-        }
-
-        CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
-        stat = CyU3PDmaChannelCommitBuffer(&ctx->src.fx3, buf_p.size, 0);
-        if (stat != CY_U3P_SUCCESS) {
-            CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
-            // Handle error appropriately
-            CyFxAppErrorHandler(stat);
-            break;
-        }
-    }
+    // for (index = 0; index < DMA_BUFFER_COUNT; index++) {
+    //     stat = CyU3PDmaChannelGetBuffer(&ctx->src.fx3, &buf_p, CYU3P_NO_WAIT);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
+    //         // Handle error appropriately
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    //
+    //     CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
+    //     stat = CyU3PDmaChannelCommitBuffer(&ctx->src.fx3, buf_p.size, 0);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
+    //         // Handle error appropriately
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    // }
+    //
+    // // Preload all buffers in the data MANUAL_OUT pipe with fixed data string
+    // for (index = 0; index < DMA_BUFFER_COUNT; index++) {
+    //     stat = CyU3PDmaChannelGetBuffer(&ctx->dataSrc.fx3, &buf_p, CYU3P_NO_WAIT);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    //
+    //     CyU3PMemCopy(buf_p.buffer, (uint8_t*)kDataStr, sizeof(kDataStr) - 1);
+    //     stat = CyU3PDmaChannelCommitBuffer(&ctx->dataSrc.fx3, sizeof(kDataStr) - 1, 0);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    // }
+    //
+    // // Preload all buffers in the event MANUAL_OUT pipe with fixed event string
+    // for (index = 0; index < DMA_BUFFER_COUNT; index++) {
+    //     stat = CyU3PDmaChannelGetBuffer(&ctx->eventSrc.fx3, &buf_p, CYU3P_NO_WAIT);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelGetBuffer failed, Error code = %d\n", stat);
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    //
+    //     CyU3PMemCopy(buf_p.buffer, (uint8_t*)kEventStr, sizeof(kEventStr) - 1);
+    //     stat = CyU3PDmaChannelCommitBuffer(&ctx->eventSrc.fx3, sizeof(kEventStr) - 1, 0);
+    //     if (stat != CY_U3P_SUCCESS) {
+    //         CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", stat);
+    //         CyFxAppErrorHandler(stat);
+    //         break;
+    //     }
+    // }
 }
 
 void Dma_RegisterListener(DmaContext_t *ctx, dma_evt_cb_t cb, void *user)
