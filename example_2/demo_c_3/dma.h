@@ -25,6 +25,8 @@ typedef struct Fx3DmaCh_t {
 typedef struct DmaContext_t {
     Fx3DmaCh_t sink;                        // DMA MANUAL_IN channel (Producer endpoint)
     Fx3DmaCh_t src;                         // DMA MANUAL_OUT channel (Consumer endpoint)
+    Fx3DmaCh_t dataSrc;                     // DMA MANUAL_OUT channel (Data endpoint)
+    Fx3DmaCh_t eventSrc;                    // DMA MANUAL_OUT channel (Event endpoint)
     uint32_t dmaRxCount;                    // Counter to track buffers received
     uint32_t dmaTxCount;                    // Counter to track buffers transmitted
     CyBool_t dataTransStarted;              // Whether DMA transfer has started after enumeration
@@ -32,6 +34,9 @@ typedef struct DmaContext_t {
     dma_evt_cb_t cb;                        // Event callback function
     void *cb_user;                          // User data for callback
 } DmaContext_t;
+
+// Helper function to send fixed string to MANUAL_OUT channel
+CyU3PReturnStatus_t Dma_SendFixedStr(CyU3PDmaChannel *ch, const char *s);
 
 // DMA module API functions
 CyU3PReturnStatus_t Dma_Init(DmaContext_t *ctx);

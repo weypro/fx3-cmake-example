@@ -170,7 +170,7 @@ const uint8_t usb_config_descriptor_ss[] __attribute__ ((aligned (32))) = {
     // Super Speed endpoint companion descriptor for data EP
     USB_SS_EP_COMPANION_DESCRIPTOR_SIZE, // Descriptor size
     CY_U3P_SS_EP_COMPN_DESCR,       // SS endpoint companion descriptor type
-    (DMA_BURST_LENGTH - 1),         // Max burst packets (0-15)
+    0x00,         // Max burst packets (0-15)
     0x00,                           // Max streams for bulk EP = 0
     0x00,0x00,                      // Service interval : 0 for bulk
 
@@ -185,7 +185,7 @@ const uint8_t usb_config_descriptor_ss[] __attribute__ ((aligned (32))) = {
     // Super Speed endpoint companion descriptor for event EP
     USB_SS_EP_COMPANION_DESCRIPTOR_SIZE, // Descriptor size
     CY_U3P_SS_EP_COMPN_DESCR,       // SS endpoint companion descriptor type
-    (DMA_BURST_LENGTH - 1),         // Max burst packets (0-15)
+    0x00,         // Max burst packets (0-15)
     0x00,                           // Max streams for bulk EP = 0
     0x00,0x00                       // Service interval : 0 for bulk
 };

@@ -105,8 +105,10 @@ void CyFxBulkSrcSinkApplnEpEvtCB(CyU3PUsbEpEvtType evtype, CyU3PUSBSpeed_t speed
 
     // Hit an endpoint retry case. Need to stall and flush the endpoint for recovery.
     if (evtype == CYU3P_USBEP_SS_RETRY_EVT) {
-        // Use DMA module API to trigger flush
-        Dma_TriggerSrcEpFlush(&g_usbCallbackContext->dma);
+        // Use DMA module API to trigger flush for consumer endpoint
+        if (epNum == USB_EP_CONSUMER) {
+            Dma_TriggerSrcEpFlush(&g_usbCallbackContext->dma);
+        }
     }
 }
 
@@ -182,6 +184,44 @@ CyBool_t CyFxBulkSrcSinkApplnUSBSetupCB(uint32_t setupdat0, uint32_t setupdat1)
                     CyU3PUsbSetEpNak(USB_EP_CONSUMER, CyFalse);
 
                     CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.src.fx3, DMA_TRANSFER_SIZE_INFINITE);
+                    CyU3PUsbStall(wIndex, CyFalse, CyTrue);
+                    isHandled = CyTrue;
+                    CyU3PUsbAckSetup();
+
+                    // Use DMA module API to fill buffers
+                    Dma_FillInBuffers(&g_usbCallbackContext->dma);
+                }
+
+                if (wIndex == USB_EP_DATA) {
+                    CyU3PUsbSetEpNak(USB_EP_DATA, CyTrue);
+                    CyU3PBusyWait(125);
+
+                    // Use DMA module API for channel operations
+                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.dataSrc.fx3);
+                    CyU3PUsbFlushEp(USB_EP_DATA);
+                    CyU3PUsbResetEp(USB_EP_DATA);
+                    CyU3PUsbSetEpNak(USB_EP_DATA, CyFalse);
+
+                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.dataSrc.fx3, DMA_TRANSFER_SIZE_INFINITE);
+                    CyU3PUsbStall(wIndex, CyFalse, CyTrue);
+                    isHandled = CyTrue;
+                    CyU3PUsbAckSetup();
+
+                    // Use DMA module API to fill buffers
+                    Dma_FillInBuffers(&g_usbCallbackContext->dma);
+                }
+
+                if (wIndex == USB_EP_EVENT) {
+                    CyU3PUsbSetEpNak(USB_EP_EVENT, CyTrue);
+                    CyU3PBusyWait(125);
+
+                    // Use DMA module API for channel operations
+                    CyU3PDmaChannelReset(&g_usbCallbackContext->dma.eventSrc.fx3);
+                    CyU3PUsbFlushEp(USB_EP_EVENT);
+                    CyU3PUsbResetEp(USB_EP_EVENT);
+                    CyU3PUsbSetEpNak(USB_EP_EVENT, CyFalse);
+
+                    CyU3PDmaChannelSetXfer(&g_usbCallbackContext->dma.eventSrc.fx3, DMA_TRANSFER_SIZE_INFINITE);
                     CyU3PUsbStall(wIndex, CyFalse, CyTrue);
                     isHandled = CyTrue;
                     CyU3PUsbAckSetup();

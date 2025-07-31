@@ -78,10 +78,26 @@ void CyFxBulkSrcSinkApplnStart(AppContext_t *appCtx)
         CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
     }
+    epCfg.burstLen = 1;
+    // Data endpoint configuration
+    apiRetStatus = CyU3PSetEpConfig(USB_EP_DATA, &epCfg);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
+
+    // Event endpoint configuration
+    apiRetStatus = CyU3PSetEpConfig(USB_EP_EVENT, &epCfg);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
 
     // Flush the endpoint memory
     CyU3PUsbFlushEp(USB_EP_PRODUCER);
     CyU3PUsbFlushEp(USB_EP_CONSUMER);
+    CyU3PUsbFlushEp(USB_EP_DATA);
+    CyU3PUsbFlushEp(USB_EP_EVENT);
 
     // Setup DMA channels using the new modular API
     apiRetStatus = Dma_SetupChannels(&appCtx->dma, size, usbSpeed);
@@ -127,6 +143,8 @@ void CyFxBulkSrcSinkApplnStop(AppContext_t *appCtx)
     // Flush the endpoint memory
     CyU3PUsbFlushEp(USB_EP_PRODUCER);
     CyU3PUsbFlushEp(USB_EP_CONSUMER);
+    CyU3PUsbFlushEp(USB_EP_DATA);
+    CyU3PUsbFlushEp(USB_EP_EVENT);
 
     // Disable endpoints
     CyU3PMemSet((uint8_t *)&epCfg, 0, sizeof(epCfg));
@@ -141,6 +159,20 @@ void CyFxBulkSrcSinkApplnStop(AppContext_t *appCtx)
 
     // Consumer endpoint configuration
     apiRetStatus = CyU3PSetEpConfig(USB_EP_CONSUMER, &epCfg);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
+
+    // Data endpoint configuration
+    apiRetStatus = CyU3PSetEpConfig(USB_EP_DATA, &epCfg);
+    if (apiRetStatus != CY_U3P_SUCCESS) {
+        CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
+        CyFxAppErrorHandler(apiRetStatus);
+    }
+
+    // Event endpoint configuration
+    apiRetStatus = CyU3PSetEpConfig(USB_EP_EVENT, &epCfg);
     if (apiRetStatus != CY_U3P_SUCCESS) {
         CyU3PDebugPrint(4, "CyU3PSetEpConfig failed, Error code = %d\n", apiRetStatus);
         CyFxAppErrorHandler(apiRetStatus);
@@ -491,7 +523,7 @@ void BulkSrcSinkAppThread_Entry(uint32_t input)
         // Force the USB 3.0 link to U2 using power module API
         if (Power_ShouldForceLinkU2(&g_appContext.power)) {
             stat = CyU3PUsbGetLinkPowerState(&curState);
-            while ((Power_ShouldForceLinkU2(&g_appContext.power)) && 
+            while ((Power_ShouldForceLinkU2(&g_appContext.power)) &&
                    (stat == CY_U3P_SUCCESS) && (curState == CyU3PUsbLPM_U0)) {
                 CyU3PUsbSetLinkPowerState(CyU3PUsbLPM_U2);
                 CyU3PThreadSleep(5);
@@ -512,7 +544,7 @@ void BulkSrcSinkAppThread_Entry(uint32_t input)
             CyU3PThreadSleep(STANDBY_VBUS_SETTLE_TIME);
 
             // Enter standby mode
-            stat = CyU3PSysEnterStandbyMode(CY_U3P_SYS_USB_VBUS_WAKEUP_SRC, 
+            stat = CyU3PSysEnterStandbyMode(CY_U3P_SYS_USB_VBUS_WAKEUP_SRC,
                                             CY_U3P_SYS_USB_VBUS_WAKEUP_SRC,
                                             (uint8_t *)0x40060000);
             if (stat != CY_U3P_SUCCESS) {
