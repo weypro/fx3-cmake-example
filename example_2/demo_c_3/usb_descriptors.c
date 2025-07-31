@@ -111,7 +111,7 @@ const uint8_t usb_config_descriptor_ss[] __attribute__ ((aligned (32))) = {
     // Configuration descriptor
     USB_CONFIG_DESCRIPTOR_SIZE,     // Descriptor size
     CY_U3P_USB_CONFIG_DESCR,        // Configuration descriptor type
-    0x2C,0x00,                      // Length of this descriptor and all sub descriptors
+    0x46,0x00,                      // Length of this descriptor and all sub descriptors
     0x01,                           // Number of interfaces
     0x01,                           // Configuration number
     0x00,                           // Configuration string index
@@ -123,7 +123,7 @@ const uint8_t usb_config_descriptor_ss[] __attribute__ ((aligned (32))) = {
     CY_U3P_USB_INTRFC_DESCR,        // Interface Descriptor type
     0x00,                           // Interface number
     0x00,                           // Alternate setting number
-    0x02,                           // Number of endpoints
+    0x04,                           // Number of endpoints
     0xFF,                           // Interface class (vendor specific)
     0x00,                           // Interface sub class
     0x00,                           // Interface protocol code
@@ -157,6 +157,36 @@ const uint8_t usb_config_descriptor_ss[] __attribute__ ((aligned (32))) = {
     CY_U3P_SS_EP_COMPN_DESCR,       // SS endpoint companion descriptor type
     (DMA_BURST_LENGTH - 1),         // Max burst packets (0-15)
     0x00,                           // Max streams for bulk EP = 0
+    0x00,0x00,                      // Service interval : 0 for bulk
+
+    // Endpoint descriptor for data EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_DATA,                    // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_SS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_SS), // Max packet size = 1024 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Super Speed endpoint companion descriptor for data EP
+    USB_SS_EP_COMPANION_DESCRIPTOR_SIZE, // Descriptor size
+    CY_U3P_SS_EP_COMPN_DESCR,       // SS endpoint companion descriptor type
+    (DMA_BURST_LENGTH - 1),         // Max burst packets (0-15)
+    0x00,                           // Max streams for bulk EP = 0
+    0x00,0x00,                      // Service interval : 0 for bulk
+
+    // Endpoint descriptor for event EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_EVENT,                   // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_SS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_SS), // Max packet size = 1024 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Super Speed endpoint companion descriptor for event EP
+    USB_SS_EP_COMPANION_DESCRIPTOR_SIZE, // Descriptor size
+    CY_U3P_SS_EP_COMPN_DESCR,       // SS endpoint companion descriptor type
+    (DMA_BURST_LENGTH - 1),         // Max burst packets (0-15)
+    0x00,                           // Max streams for bulk EP = 0
     0x00,0x00                       // Service interval : 0 for bulk
 };
 
@@ -165,7 +195,7 @@ const uint8_t usb_config_descriptor_hs[] __attribute__ ((aligned (32))) = {
     // Configuration descriptor
     USB_CONFIG_DESCRIPTOR_SIZE,     // Descriptor size
     CY_U3P_USB_CONFIG_DESCR,        // Configuration descriptor type
-    0x20,0x00,                      // Length of this descriptor and all sub descriptors
+    0x2E,0x00,                      // Length of this descriptor and all sub descriptors
     0x01,                           // Number of interfaces
     0x01,                           // Configuration number
     0x00,                           // Configuration string index
@@ -177,7 +207,7 @@ const uint8_t usb_config_descriptor_hs[] __attribute__ ((aligned (32))) = {
     CY_U3P_USB_INTRFC_DESCR,        // Interface Descriptor type
     0x00,                           // Interface number
     0x00,                           // Alternate setting number
-    0x02,                           // Number of endpoints
+    0x04,                           // Number of endpoints
     0xFF,                           // Interface class (vendor specific)
     0x00,                           // Interface sub class
     0x00,                           // Interface protocol code
@@ -197,6 +227,22 @@ const uint8_t usb_config_descriptor_hs[] __attribute__ ((aligned (32))) = {
     USB_EP_CONSUMER,                // Endpoint address and description
     CY_U3P_USB_EP_BULK,             // Bulk endpoint type
     GET_LOW_BYTE(USB_BULK_PACKET_SIZE_HS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_HS), // Max packet size = 512 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Endpoint descriptor for data EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_DATA,                    // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_HS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_HS), // Max packet size = 512 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Endpoint descriptor for event EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_EVENT,                   // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_HS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_HS), // Max packet size = 512 bytes
     0x00                            // Servicing interval : 0 for bulk
 };
 
@@ -205,7 +251,7 @@ const uint8_t usb_config_descriptor_fs[] __attribute__ ((aligned (32))) = {
     // Configuration descriptor
     USB_CONFIG_DESCRIPTOR_SIZE,     // Descriptor size
     CY_U3P_USB_CONFIG_DESCR,        // Configuration descriptor type
-    0x20,0x00,                      // Length of this descriptor and all sub descriptors
+    0x2E,0x00,                      // Length of this descriptor and all sub descriptors
     0x01,                           // Number of interfaces
     0x01,                           // Configuration number
     0x00,                           // Configuration string index
@@ -217,7 +263,7 @@ const uint8_t usb_config_descriptor_fs[] __attribute__ ((aligned (32))) = {
     CY_U3P_USB_INTRFC_DESCR,        // Interface descriptor type
     0x00,                           // Interface number
     0x00,                           // Alternate setting number
-    0x02,                           // Number of endpoints
+    0x04,                           // Number of endpoints
     0xFF,                           // Interface class (vendor specific)
     0x00,                           // Interface sub class
     0x00,                           // Interface protocol code
@@ -235,6 +281,22 @@ const uint8_t usb_config_descriptor_fs[] __attribute__ ((aligned (32))) = {
     USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
     CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
     USB_EP_CONSUMER,                // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_FS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_FS), // Max packet size = 64 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Endpoint descriptor for data EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_DATA,                    // Endpoint address and description
+    CY_U3P_USB_EP_BULK,             // Bulk endpoint type
+    GET_LOW_BYTE(USB_BULK_PACKET_SIZE_FS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_FS), // Max packet size = 64 bytes
+    0x00,                           // Servicing interval : 0 for bulk
+
+    // Endpoint descriptor for event EP (IN)
+    USB_ENDPOINT_DESCRIPTOR_SIZE,   // Descriptor size
+    CY_U3P_USB_ENDPNT_DESCR,        // Endpoint descriptor type
+    USB_EP_EVENT,                   // Endpoint address and description
     CY_U3P_USB_EP_BULK,             // Bulk endpoint type
     GET_LOW_BYTE(USB_BULK_PACKET_SIZE_FS), GET_HIGH_BYTE(USB_BULK_PACKET_SIZE_FS), // Max packet size = 64 bytes
     0x00                            // Servicing interval : 0 for bulk

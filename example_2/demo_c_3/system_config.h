@@ -6,8 +6,12 @@
 // USB endpoint configuration
 #define USB_EP_PRODUCER         0x01    // EP 1 OUT (host to device)
 #define USB_EP_CONSUMER         0x81    // EP 1 IN (device to host)
+#define USB_EP_DATA             0x82    // EP 2 IN (device to host) - Data channel
+#define USB_EP_EVENT            0x83    // EP 3 IN (device to host) - Event channel
 #define USB_EP_PRODUCER_SOCKET  CY_U3P_UIB_SOCKET_PROD_1
 #define USB_EP_CONSUMER_SOCKET  CY_U3P_UIB_SOCKET_CONS_1
+#define USB_EP_DATA_SOCKET      CY_U3P_UIB_SOCKET_CONS_2
+#define USB_EP_EVENT_SOCKET     CY_U3P_UIB_SOCKET_CONS_3
 
 // DMA configuration - optimized for different memory configurations
 #ifdef CYMEM_256K
