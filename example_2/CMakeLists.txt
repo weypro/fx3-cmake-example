@@ -55,6 +55,7 @@ endif()
 
 if(BUILD_DEMO_C_2)
   add_subdirectory(demo_c_2)
+  add_subdirectory(demo_c_3)
 endif()
 
 if(BUILD_DEMO_CPP)
