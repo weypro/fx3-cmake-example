@@ -401,23 +401,23 @@ static void DmaCb(CyU3PDmaChannel *chHandle, CyU3PDmaCbType_t type,
         status = CyU3PDmaChannelGetBuffer(chHandle, &buf_p, CYU3P_NO_WAIT);
         if (status == CY_U3P_SUCCESS) {
             // Determine which channel this is and fill appropriate data
-            if (chHandle == &ctx->src.fx3) {
-                // Control-IN channel: fill with pattern
-                CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
-                status = CyU3PDmaChannelCommitBuffer(chHandle, buf_p.size, 0);
-            } else if (chHandle == &ctx->dataSrc.fx3) {
-                // Data-IN channel: fill with "data"
-                CyU3PMemCopy(buf_p.buffer, (uint8_t*)kDataStr, sizeof(kDataStr) - 1);
-                status = CyU3PDmaChannelCommitBuffer(chHandle, sizeof(kDataStr) - 1, 0);
-            } else if (chHandle == &ctx->eventSrc.fx3) {
-                // Event-IN channel: fill with "event"
-                CyU3PMemCopy(buf_p.buffer, (uint8_t*)kEventStr, sizeof(kEventStr) - 1);
-                status = CyU3PDmaChannelCommitBuffer(chHandle, sizeof(kEventStr) - 1, 0);
-            } else {
-                // Unknown channel, fill with pattern
-                CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
-                status = CyU3PDmaChannelCommitBuffer(chHandle, buf_p.size, 0);
-            }
+            // if (chHandle == &ctx->src.fx3) {
+            //     // Control-IN channel: fill with pattern
+            //     CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
+            //     status = CyU3PDmaChannelCommitBuffer(chHandle, buf_p.size, 0);
+            // } else if (chHandle == &ctx->dataSrc.fx3) {
+            //     // Data-IN channel: fill with "data"
+            //     CyU3PMemCopy(buf_p.buffer, (uint8_t*)kDataStr, sizeof(kDataStr) - 1);
+            //     status = CyU3PDmaChannelCommitBuffer(chHandle, sizeof(kDataStr) - 1, 0);
+            // } else if (chHandle == &ctx->eventSrc.fx3) {
+            //     // Event-IN channel: fill with "event"
+            //     CyU3PMemCopy(buf_p.buffer, (uint8_t*)kEventStr, sizeof(kEventStr) - 1);
+            //     status = CyU3PDmaChannelCommitBuffer(chHandle, sizeof(kEventStr) - 1, 0);
+            // } else {
+            //     // Unknown channel, fill with pattern
+            //     CyU3PMemSet(buf_p.buffer, BULK_DATA_PATTERN, buf_p.size);
+            //     status = CyU3PDmaChannelCommitBuffer(chHandle, buf_p.size, 0);
+            // }
 
             if (status != CY_U3P_SUCCESS) {
                 CyU3PDebugPrint(4, "CyU3PDmaChannelCommitBuffer failed, Error code = %d\n", status);
