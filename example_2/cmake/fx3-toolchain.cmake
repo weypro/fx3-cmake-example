@@ -49,7 +49,9 @@ if(NOT FX3_INSTALL_PATH)
     message(FATAL_ERROR "FX3_INSTALL_PATH is not set. Please specify the Cypress/Infineon FX3 SDK root.")
 endif()
 file(TO_CMAKE_PATH "${FX3_INSTALL_PATH}" FX3_INSTALL_PATH)
-set(FX3_FIRMWARE_COMMON_ROOT "${FX3_INSTALL_PATH}/fw_build/fx3_fw")
+if(NOT DEFINED FX3_FIRMWARE_COMMON_ROOT)
+    set(FX3_FIRMWARE_COMMON_ROOT "${FX3_INSTALL_PATH}/fw_build/fx3_fw")
+endif()
 set(FX3_FIRMWARE_ROOT "${FX3_INSTALL_PATH}/firmware")
 set(FX3_PFWROOT   "${FX3_FIRMWARE_ROOT}/u3p_firmware")
 set(FX3_INCLUDE_DIR "${FX3_PFWROOT}/inc")
@@ -174,8 +176,8 @@ function(fx3_get_default_sources out_var enable_cxx)
 endfunction()
 function(fx3_add_firmware target_name)
     # Parameter definition
-    set(_opts ENABLE_CXX ENABLE_STDC NO_STDCXX MAP_FILE LTO KEEP_VECTORLOAD)
-    set(_singles LINKER_SCRIPT OUTPUT_DIRECTORY OUTPUT_IMG I2C_CONF)
+    set(_opts ENABLE_CXX ENABLE_STDC MAP_FILE LTO KEEP_VECTORLOAD)
+    set(_singles LINKER_SCRIPT OUTPUT_NAME OUTPUT_DIRECTORY OUTPUT_IMG I2C_CONF)
     set(_multis SOURCES INCLUDE_DIRS DEFINES LIB_DIRS LIBS COMPILE_OPTIONS LINK_OPTIONS)
 
     # Parameter parsing and validation
@@ -204,11 +206,16 @@ function(fx3_add_firmware target_name)
 
     # Create target
     add_executable(${target_name} ${FX3_SOURCES} ${_core_src})
-    set_target_properties(${target_name} PROPERTIES OUTPUT_NAME "${target_name}.elf")
     if(FX3_OUTPUT_DIRECTORY)
         set_target_properties(${target_name} PROPERTIES
                 RUNTIME_OUTPUT_DIRECTORY "${FX3_OUTPUT_DIRECTORY}")
     endif()
+
+    set(output_name ${target_name})
+    if (FX3_OUTPUT_NAME)
+        set(output_name ${FX3_OUTPUT_NAME})
+    endif()
+    set_property(TARGET "${target_name}" PROPERTY OUTPUT_NAME "${output_name}.elf")
 
     # Compilation and link options collection
     set(_compile_opts)
@@ -230,7 +237,7 @@ function(fx3_add_firmware target_name)
 
     # MAP file generation
     if(FX3_MAP_FILE)
-        list(APPEND _link_opts "LINKER:-Map=${target_name}.map")
+        list(APPEND _link_opts "LINKER:-Map=${output_name}.map")
     endif()
 
     # Apply compilation and link options
@@ -284,7 +291,7 @@ function(fx3_add_firmware target_name)
         if(FX3_OUTPUT_IMG)
             set(_img_output "${FX3_OUTPUT_IMG}")
         else()
-            set(_img_output "${target_name}.img")
+            set(_img_output "${output_name}.img")
         endif()
 
         # Build elf2img command arguments
@@ -299,17 +306,16 @@ function(fx3_add_firmware target_name)
         add_custom_command(TARGET ${target_name} POST_BUILD
                 COMMAND ${ELF2IMG_TOOL} ${_elf2img_args}
                 BYPRODUCTS ${_img_output}
-                COMMENT "Converting ${target_name}.elf to ${_img_output}")
+                COMMENT "Converting ${output_name}.elf to ${_img_output}")
     endif()
 
     # Unified status printing
-    message(STATUS "[FX3] Target: ${target_name}")
-    message(STATUS "[FX3] Linker: ${FX3_LINKER_SCRIPT}")
-    message(STATUS "[FX3] C++: ${FX3_ENABLE_CXX}")
-    message(STATUS "[FX3] STD C: ${FX3_ENABLE_STDC}")
-    message(STATUS "[FX3] LTO: ${FX3_LTO}")
-    message(STATUS "[FX3] Map: ${FX3_MAP_FILE}")
-    message(STATUS "[FX3] SDK: ${_sdk_name}")
+    message(STATUS "Target: ${target_name}")
+    message(STATUS "  Linker: ${FX3_LINKER_SCRIPT}")
+    message(STATUS "  C++: ${FX3_ENABLE_CXX}")
+    message(STATUS "  LTO: ${FX3_LTO}")
+    message(STATUS "  Map: ${FX3_MAP_FILE}")
+    message(STATUS "  SDK: ${_sdk_name}")
 endfunction()
 
 # -----------------------------------------------------------------------------
