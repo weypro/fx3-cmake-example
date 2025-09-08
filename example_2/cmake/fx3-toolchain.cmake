@@ -291,7 +291,12 @@ function(fx3_add_firmware target_name)
         if(FX3_OUTPUT_IMG)
             set(_img_output "${FX3_OUTPUT_IMG}")
         else()
-            set(_img_output "${output_name}.img")
+            get_target_property(_runtime_dir ${target_name} RUNTIME_OUTPUT_DIRECTORY)
+            if(_runtime_dir)
+                set(_img_output "${_runtime_dir}/${output_name}.img")
+            else()
+                set(_img_output "${output_name}.img")
+            endif()
         endif()
 
         # Build elf2img command arguments
